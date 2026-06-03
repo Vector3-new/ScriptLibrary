@@ -38,20 +38,20 @@ if typeof(clonefunction) == "function" then
     end
 end
 
-local SaveManager = {} do
-    SaveManager.Folder = "ObsidianLibSettings"
-    SaveManager.SubFolder = ""
-    SaveManager.Ignore = {}
-    SaveManager.Library = nil
-    SaveManager.UseLoadingOrder = false
-    SaveManager.LoadingOrder = {}
-    SaveManager.Parser = {
+local SaveManagerClone = {} do
+    SaveManagerClone.Folder = "ObsidianLibSettings"
+    SaveManagerClone.SubFolder = ""
+    SaveManagerClone.Ignore = {}
+    SaveManagerClone.Library = nil
+    SaveManagerClone.UseLoadingOrder = false
+    SaveManagerClone.LoadingOrder = {}
+    SaveManagerClone.Parser = {
         Toggle = {
             Save = function(idx, object)
                 return { type = "Toggle", idx = idx, value = object.Value }
             end,
             Load = function(idx, data)
-                local object = SaveManager.Library.Toggles[idx]
+                local object = SaveManagerClone.Library.Toggles[idx]
                 if object and object.Value ~= data.value then
                     object:SetValue(data.value)
                 end
@@ -62,7 +62,7 @@ local SaveManager = {} do
                 return { type = "Slider", idx = idx, value = tostring(object.Value) }
             end,
             Load = function(idx, data)
-                local object = SaveManager.Library.Options[idx]
+                local object = SaveManagerClone.Library.Options[idx]
                 if object and object.Value ~= data.value then
                     object:SetValue(data.value)
                 end
@@ -73,7 +73,7 @@ local SaveManager = {} do
                 return { type = "Dropdown", idx = idx, value = object.Value, multi = object.Multi }
             end,
             Load = function(idx, data)
-                local object = SaveManager.Library.Options[idx]
+                local object = SaveManagerClone.Library.Options[idx]
                 if object and object.Value ~= data.value then
                     object:SetValue(data.value)
                 end
@@ -84,8 +84,8 @@ local SaveManager = {} do
                 return { type = "ColorPicker", idx = idx, value = object.Value:ToHex(), transparency = object.Transparency }
             end,
             Load = function(idx, data)
-                if SaveManager.Library.Options[idx] then
-                    SaveManager.Library.Options[idx]:SetValueRGB(Color3.fromHex(data.value), data.transparency)
+                if SaveManagerClone.Library.Options[idx] then
+                    SaveManagerClone.Library.Options[idx]:SetValueRGB(Color3.fromHex(data.value), data.transparency)
                 end
             end,
         },
@@ -94,8 +94,8 @@ local SaveManager = {} do
                 return { type = "KeyPicker", idx = idx, mode = object.Mode, key = object.Value, modifiers = object.Modifiers }
             end,
             Load = function(idx, data)
-                if SaveManager.Library.Options[idx] then
-                    SaveManager.Library.Options[idx]:SetValue({ data.key, data.mode, data.modifiers })
+                if SaveManagerClone.Library.Options[idx] then
+                    SaveManagerClone.Library.Options[idx]:SetValue({ data.key, data.mode, data.modifiers })
                 end
             end,
         },
@@ -104,19 +104,19 @@ local SaveManager = {} do
                 return { type = "Input", idx = idx, text = object.Value }
             end,
             Load = function(idx, data)
-                local object = SaveManager.Library.Options[idx]
+                local object = SaveManagerClone.Library.Options[idx]
                 if object and object.Value ~= data.text and type(data.text) == "string" then
-                    SaveManager.Library.Options[idx]:SetValue(data.text)
+                    SaveManagerClone.Library.Options[idx]:SetValue(data.text)
                 end
             end,
         },
     }
 
-    function SaveManager:SetLibrary(library)
+    function SaveManagerClone:SetLibrary(library)
         self.Library = library
     end
 
-    function SaveManager:SetLoadingOrder(enabled, order)
+    function SaveManagerClone:SetLoadingOrder(enabled, order)
         self.UseLoadingOrder = enabled
 
         if typeof(order) == "table" then
@@ -124,7 +124,7 @@ local SaveManager = {} do
         end
     end
 
-    function SaveManager:IgnoreThemeSettings()
+    function SaveManagerClone:IgnoreThemeSettings()
         self:SetIgnoreIndexes({
             "BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", "FontFace", -- themes
             "ThemeManager_ThemeList", "ThemeManager_CustomThemeList", "ThemeManager_CustomThemeName", -- themes
@@ -132,7 +132,7 @@ local SaveManager = {} do
     end
 
     --// Folders \\--
-    function SaveManager:CheckSubFolder(createFolder)
+    function SaveManagerClone:CheckSubFolder(createFolder)
         if typeof(self.SubFolder) ~= "string" or self.SubFolder == "" then return false end
 
         if createFolder == true then
@@ -144,7 +144,7 @@ local SaveManager = {} do
         return true
     end
 
-    function SaveManager:GetPaths()
+    function SaveManagerClone:GetPaths()
         local paths = {}
 
         local parts = self.Folder:split("/")
@@ -169,7 +169,7 @@ local SaveManager = {} do
         return paths
     end
 
-    function SaveManager:BuildFolderTree()
+    function SaveManagerClone:BuildFolderTree()
         local paths = self:GetPaths()
 
         for i = 1, #paths do
@@ -180,38 +180,38 @@ local SaveManager = {} do
         end
     end
 
-    function SaveManager:CheckFolderTree()
+    function SaveManagerClone:CheckFolderTree()
         if isfolder(self.Folder) then return end
-        SaveManager:BuildFolderTree()
+        SaveManagerClone:BuildFolderTree()
 
         task.wait(0.1)
     end
 
-    function SaveManager:SetIgnoreIndexes(list)
+    function SaveManagerClone:SetIgnoreIndexes(list)
         for _, key in pairs(list) do
             self.Ignore[key] = true
         end
     end
 
-    function SaveManager:SetFolder(folder)
+    function SaveManagerClone:SetFolder(folder)
         self.Folder = folder
         self:BuildFolderTree()
     end
 
-    function SaveManager:SetSubFolder(folder)
+    function SaveManagerClone:SetSubFolder(folder)
         self.SubFolder = folder
         self:BuildFolderTree()
     end
 
     --// Save, Load, Delete, Refresh \\--
-    function SaveManager:Save(name)
+    function SaveManagerClone:Save(name)
         if (not name) then
             return false, "no config file is selected"
         end
-        SaveManager:CheckFolderTree()
+        SaveManagerClone:CheckFolderTree()
 
         local fullPath = self.Folder .. "/settings/" .. name .. ".json"
-        if SaveManager:CheckSubFolder(true) then
+        if SaveManagerClone:CheckSubFolder(true) then
             fullPath = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
         end
 
@@ -244,14 +244,14 @@ local SaveManager = {} do
         return true
     end
 
-    function SaveManager:Load(name)
+    function SaveManagerClone:Load(name)
         if (not name) then
             return false, "no config file is selected"
         end
-        SaveManager:CheckFolderTree()
+        SaveManagerClone:CheckFolderTree()
 
         local file = self.Folder .. "/settings/" .. name .. ".json"
-        if SaveManager:CheckSubFolder(true) then
+        if SaveManagerClone:CheckSubFolder(true) then
             file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
         end
 
@@ -279,13 +279,13 @@ local SaveManager = {} do
         return true
     end
 
-    function SaveManager:Delete(name)
+    function SaveManagerClone:Delete(name)
         if (not name) then
             return false, "no config file is selected"
         end
 
         local file = self.Folder .. "/settings/" .. name .. ".json"
-        if SaveManager:CheckSubFolder(true) then
+        if SaveManagerClone:CheckSubFolder(true) then
             file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
         end
 
@@ -297,14 +297,14 @@ local SaveManager = {} do
         return true
     end
 
-    function SaveManager:RefreshConfigList()
+    function SaveManagerClone:RefreshConfigList()
         local success, data = pcall(function()
-            SaveManager:CheckFolderTree()
+            SaveManagerClone:CheckFolderTree()
 
             local list = {}
             local out = {}
 
-            if SaveManager:CheckSubFolder(true) then
+            if SaveManagerClone:CheckSubFolder(true) then
                 list = listfiles(self.Folder .. "/settings/" .. self.SubFolder)
             else
                 list = listfiles(self.Folder .. "/settings")
@@ -348,11 +348,11 @@ local SaveManager = {} do
     end
 
     --// Auto Load \\--
-    function SaveManager:GetAutoloadConfig()
-        SaveManager:CheckFolderTree()
+    function SaveManagerClone:GetAutoloadConfig()
+        SaveManagerClone:CheckFolderTree()
 
         local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-        if SaveManager:CheckSubFolder(true) then
+        if SaveManagerClone:CheckSubFolder(true) then
             autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
         end
 
@@ -369,11 +369,11 @@ local SaveManager = {} do
         return "none"
     end
 
-    function SaveManager:LoadAutoloadConfig()
-        SaveManager:CheckFolderTree()
+    function SaveManagerClone:LoadAutoloadConfig()
+        SaveManagerClone:CheckFolderTree()
 
         local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-        if SaveManager:CheckSubFolder(true) then
+        if SaveManagerClone:CheckSubFolder(true) then
             autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
         end
 
@@ -394,11 +394,11 @@ local SaveManager = {} do
         end
     end
 
-    function SaveManager:SaveAutoloadConfig(name)
-        SaveManager:CheckFolderTree()
+    function SaveManagerClone:SaveAutoloadConfig(name)
+        SaveManagerClone:CheckFolderTree()
 
         local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-        if SaveManager:CheckSubFolder(true) then
+        if SaveManagerClone:CheckSubFolder(true) then
             autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
         end
 
@@ -408,11 +408,11 @@ local SaveManager = {} do
         return true, ""
     end
 
-    function SaveManager:DeleteAutoLoadConfig()
-        SaveManager:CheckFolderTree()
+    function SaveManagerClone:DeleteAutoLoadConfig()
+        SaveManagerClone:CheckFolderTree()
 
         local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-        if SaveManager:CheckSubFolder(true) then
+        if SaveManagerClone:CheckSubFolder(true) then
             autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
         end
 
@@ -423,14 +423,14 @@ local SaveManager = {} do
     end
 
     --// GUI \\--
-    function SaveManager:BuildConfigSection(tab)
-        assert(self.Library, "Must set SaveManager.Library")
+    function SaveManagerClone:BuildConfigSection(tab)
+        assert(self.Library, "Must set SaveManagerClone.Library")
 
         local section = tab:AddRightGroupbox("Configuration", "folder-cog")
 
-        section:AddInput("SaveManager_ConfigName",    { Text = "Config name" })
+        section:AddInput("SaveManagerClone_ConfigName",    { Text = "Config name" })
         section:AddButton("Create config", function()
-            local name = self.Library.Options.SaveManager_ConfigName.Value
+            local name = self.Library.Options.SaveManagerClone_ConfigName.Value
 
             if name:gsub(" ", "") == "" then
                 self.Library:Notify("Invalid config name (empty)", 2)
@@ -444,15 +444,15 @@ local SaveManager = {} do
             end
 
             self.Library:Notify(string.format("Created config %q", name))
-            self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-            self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+            self.Library.Options.SaveManagerClone_ConfigList:SetValues(self:RefreshConfigList())
+            self.Library.Options.SaveManagerClone_ConfigList:SetValue(nil)
         end)
 
         section:AddDivider()
 
-        section:AddDropdown("SaveManager_ConfigList", { Text = "Config list", Values = self:RefreshConfigList(), AllowNull = true })
+        section:AddDropdown("SaveManagerClone_ConfigList", { Text = "Config list", Values = self:RefreshConfigList(), AllowNull = true })
         section:AddButton("Load config", function()
-            local name = self.Library.Options.SaveManager_ConfigList.Value
+            local name = self.Library.Options.SaveManagerClone_ConfigList.Value
 
             local success, err = self:Load(name)
             if not success then
@@ -463,7 +463,7 @@ local SaveManager = {} do
             self.Library:Notify(string.format("Loaded config %q", name))
         end)
         section:AddButton("Overwrite config", function()
-            local name = self.Library.Options.SaveManager_ConfigList.Value
+            local name = self.Library.Options.SaveManagerClone_ConfigList.Value
 
             local success, err = self:Save(name)
             if not success then
@@ -475,7 +475,7 @@ local SaveManager = {} do
         end)
 
         section:AddButton("Delete config", function()
-            local name = self.Library.Options.SaveManager_ConfigList.Value
+            local name = self.Library.Options.SaveManagerClone_ConfigList.Value
 
             local success, err = self:Delete(name)
             if not success then
@@ -484,17 +484,17 @@ local SaveManager = {} do
             end
 
             self.Library:Notify(string.format("Deleted config %q", name))
-            self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-            self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+            self.Library.Options.SaveManagerClone_ConfigList:SetValues(self:RefreshConfigList())
+            self.Library.Options.SaveManagerClone_ConfigList:SetValue(nil)
         end)
 
         section:AddButton("Refresh list", function()
-            self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-            self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+            self.Library.Options.SaveManagerClone_ConfigList:SetValues(self:RefreshConfigList())
+            self.Library.Options.SaveManagerClone_ConfigList:SetValue(nil)
         end)
 
         section:AddButton("Set as autoload", function()
-            local name = self.Library.Options.SaveManager_ConfigList.Value
+            local name = self.Library.Options.SaveManagerClone_ConfigList.Value
 
             local success, err = self:SaveAutoloadConfig(name)
             if not success then
@@ -519,10 +519,10 @@ local SaveManager = {} do
         self.AutoloadConfigLabel = section:AddLabel("Current autoload config: " .. self:GetAutoloadConfig(), true)
 
         -- self:LoadAutoloadConfig()
-        self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
+        self:SetIgnoreIndexes({ "SaveManagerClone_ConfigList", "SaveManagerClone_ConfigName" })
     end
 
-    SaveManager:BuildFolderTree()
+    SaveManagerClone:BuildFolderTree()
 end
 
-return SaveManager
+return SaveManagerClone
