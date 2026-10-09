@@ -1152,7 +1152,7 @@ type IconModule = {
 
 local FetchIcons, Icons = pcall(function()
     return (loadstring(
-        game:HttpGet("https://upio-github-mirror.pages.dev/source.lua")
+        game:HttpGet("https://raw.githubusercontent.com/Vector3-new/ScriptLibrary/refs/heads/main/Icons.Lua")
     ) :: () -> IconModule)()
 end)
 
